@@ -3,7 +3,7 @@ PRJ=adry89_wet_kk
 
 ./mk -o=TARGET_BUILD_VARIANT=user adry89_wet_kk n k
 
- echo "		gen out/target/product/adry89_wet_kk/ boot.img ..."
+ echo "		gen out/target/product/adry89_wet_kk/boot.img ..."
  cp out/target/product/${PRJ}/obj/KERNEL_OBJ/arch/arm/boot/zImage out/target/product/${PRJ}/zImage
  mediatek/build/tools/images/acp -uv out/target/product/${PRJ}/kernel_${PRJ}.bin out/target/product/${PRJ}/kernel
  mediatek/build/tools/images/mkbootfs mediatek/host/root | mediatek/build/tools/images/minigzip > out/target/product/${PRJ}/ramdisk.img

@@ -177,7 +177,7 @@ CUSTOM_KERNEL_USB=mt6577
 CUSTOM_KERNEL_VIBRATOR=vibrator
 
 # To choose LK LCM driver name
-CUSTOM_LK_LCM=nt35590_auo47_truly otm1283a_auo50_ykl_hd
+CUSTOM_LK_LCM=nt35521_linglong_T499_84M_JDI_dsi_4_vdo_hd otm1283a_ykl_LP050CPKP245A_CMI_dsi_vdo_hd nt35590_linglong_T499_47M_AUO_dsi_4_vdo_hd otm1283a_ykl_LP050APKP159A_auo_dsi_vdo_hd
 
 # Support customer to implement and apply their own RSA security functions
 CUSTOM_SEC_AUTH_SUPPORT=no
@@ -1461,10 +1461,10 @@ MTK_HDMI_SUPPORT=no
 BOOT_LOGO=hd720
 
 # To choose kernel LCM driver name
-CUSTOM_KERNEL_LCM=nt35590_auo47_truly otm1283a_auo50_ykl_hd
+CUSTOM_KERNEL_LCM=nt35521_linglong_T499_84M_JDI_dsi_4_vdo_hd otm1283a_ykl_LP050CPKP245A_CMI_dsi_vdo_hd nt35590_linglong_T499_47M_AUO_dsi_4_vdo_hd otm1283a_ykl_LP050APKP159A_auo_dsi_vdo_hd
 
 # To choose uboot LCM driver name
-CUSTOM_UBOOT_LCM=nt35590_auo47_truly otm1283a_auo50_ykl_hd
+CUSTOM_UBOOT_LCM=nt35521_linglong_T499_84M_JDI_dsi_4_vdo_hd otm1283a_ykl_LP050CPKP245A_CMI_dsi_vdo_hd nt35590_linglong_T499_47M_AUO_dsi_4_vdo_hd otm1283a_ykl_LP050APKP159A_auo_dsi_vdo_hd
 
 # To set LCM resolution height size
 LCM_HEIGHT=1280

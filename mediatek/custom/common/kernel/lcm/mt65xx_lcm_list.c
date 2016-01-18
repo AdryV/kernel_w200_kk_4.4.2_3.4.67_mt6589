@@ -17,6 +17,14 @@
 #else
 #define LCD_DEBUG(fmt)  printk(fmt)
 #endif
+
+extern LCM_DRIVER nt35521_linglong_T499_84M_JDI_dsi_4_vdo_hd_lcm_drv;
+extern LCM_DRIVER otm1283a_ykl_LP050CPKP245A_CMI_dsi_vdo_hd_lcm_drv;
+extern LCM_DRIVER nt35590_linglong_T499_47M_AUO_dsi_4_vdo_hd_lcm_drv;
+extern LCM_DRIVER otm1283a_ykl_LP050APKP159A_auo_dsi_vdo_hd_lcm_drv;
+extern LCM_DRIVER otm1283a_jmo_lcm_drv;
+extern LCM_DRIVER otm1283a_hd_pngd_lcm_drv;
+extern LCM_DRIVER otm1283a_hd720_dsi_adr_lcm_drv;
 extern LCM_DRIVER otm1282a_hd720_dsi_vdo_lcm_drv;
 extern LCM_DRIVER r63319_wqhd_dsi_vdo_truly_lcm_drv;
 extern LCM_DRIVER nt35598_wqhd_dsi_vdo_truly_lcm_drv;
@@ -214,7 +222,8 @@ extern LCM_DRIVER nt35595_fhd_dsi_lcm_drv;
 extern LCM_DRIVER hx8389b_qhd_dsi_vdo_drv;
 extern LCM_DRIVER nt35596_auo60_ykl_fhd_lcm_drv;
 extern LCM_DRIVER otm1283a_auo50_ykl_hd_lcm_drv;
-extern LCM_DRIVER nt35590_hd720_dsi_vdo_s800_lcm_drv;
+extern LCM_DRIVER otm1283a_ykl_hd_lcm_drv;
+extern LCM_DRIVER nt35590_hd720_dsi_vdo_lcm_drv;
 extern LCM_DRIVER otm1283a_dsi_vdo_trust_hd720_cmi_ips_lcm_drv;//++++rgk bug-id:no add by yangjuwei 20140703
 extern LCM_DRIVER nt35590_hd720_dsi_vdo_s800_chuanma_lcm_drv;
 extern LCM_DRIVER otm9605a_qhd_dsi_vdo_u701b_ykl_lcm_drv;
@@ -275,12 +284,32 @@ LCM_DRIVER* lcm_driver_list[] =
     &otm1283a_auo50_ykl_hd_lcm_drv,
 #endif
 
+#if defined(OTM1283A_YKL_HD)
+    &otm1283a_ykl_hd_lcm_drv,
+#endif
+
+#if defined(NT35521_LINGLONG_T499_84M_JDI_DSI_4_VDO_HD)
+    &nt35521_linglong_T499_84M_JDI_dsi_4_vdo_hd_lcm_drv,
+#endif
+
+#if defined(OTM1283A_YKL_LP050CPKP245A_CMI_DSI_VDO_HD)
+    &otm1283a_ykl_LP050CPKP245A_CMI_dsi_vdo_hd_lcm_drv,
+#endif
+
+#if defined(NT35590_LINGLONG_T499_47M_AUO_DSI_4_VDO_HD)
+    &nt35590_linglong_T499_47M_AUO_dsi_4_vdo_hd_lcm_drv,
+#endif
+
+#if defined(OTM1283A_YKL_LP050APKP159A_AUO_DSI_VDO_HD)
+    &otm1283a_ykl_LP050APKP159A_auo_dsi_vdo_hd_lcm_drv,
+#endif
+
 #if defined(OTM9605A_QHD_DSI_VDO_U701B_YKL)
    &otm9605a_qhd_dsi_vdo_u701b_ykl_lcm_drv,
 #endif
 
-#if defined(NT35590_HD720_DSI_VDO_S800)
-   &nt35590_hd720_dsi_vdo_s800_lcm_drv,
+#if defined(NT35590_HD720_DSI_VDO)
+   &nt35590_hd720_dsi_vdo_lcm_drv,
 #endif
 
 #if defined(NT35590_HD720_DSI_VDO_S800_CHUANMA)
@@ -293,6 +322,18 @@ LCM_DRIVER* lcm_driver_list[] =
 
 #if defined(OTM1282A_HD720_DSI_VDO)
 	&otm1282a_hd720_dsi_vdo_lcm_drv,
+#endif
+
+#if defined(OTM1283A_HD720_DSI_ADR)
+	&otm1283a_hd720_dsi_adr_lcm_drv,
+#endif
+
+#if defined(OTM1283A_HD_PNGD)
+	&otm1283a_hd_pngd_lcm_drv,
+#endif
+
+#if defined(OTM1283A_JMO)
+	&otm1283a_jmo_lcm_drv,
 #endif
 
 #if defined(R63311_FHD_DSI_VDO)
