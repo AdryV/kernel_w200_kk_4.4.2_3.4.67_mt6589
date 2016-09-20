@@ -49,7 +49,7 @@ CUSTOM_HAL_EEPROM=dummy_eeprom
 # User space cameara flashlight driver.You can use this driver to choose cameara flashlight type.
 CUSTOM_HAL_FLASHLIGHT=constant_flashlight
 
-CUSTOM_HAL_IMGSENSOR = ov8825_mipi_raw s5k4e1ga_mipi_raw 
+CUSTOM_HAL_IMGSENSOR = ov8825_mipi_raw s5k4e1ga_raw 
 
 CUSTOM_HAL_LENS = ov8825af dummy_lens
 
@@ -79,7 +79,7 @@ CUSTOM_HAL_SUB_BACKUP_IMGSENSOR =
 CUSTOM_HAL_SUB_BACKUP_LENS= dummy_lens
 
 # User space driver: Sub camera (front camera )used sensor related tuning, setting and calibration information. Value is used sub sensor name.
-CUSTOM_HAL_SUB_IMGSENSOR = s5k4e1ga_mipi_raw 
+CUSTOM_HAL_SUB_IMGSENSOR = s5k4e1ga_raw 
 
 
 # lens driver config for video telephony camera
@@ -119,7 +119,7 @@ CUSTOM_KERNEL_HEADSET=accdet
 CUSTOM_KERNEL_GYROSCOPE=
 
 # Kernel space image sensor driver. Define  project used all image sensors .The value is combination of CUSTOM_KERNEL_MAIN_IMGSENSOR, CUSTOM_KERNEL_MAIN_BACKUP_IMGSENSOR, CUSTOM_KERNEL_SUB_IMGSENSOR, and CUSTOM_KERNEL_SUB_BACKUP_IMGSENSOR
-CUSTOM_KERNEL_IMGSENSOR = ov8825_mipi_raw s5k4e1ga_mipi_raw
+CUSTOM_KERNEL_IMGSENSOR = ov8825_mipi_raw s5k4e1ga_raw
 
 # key pad driver to report key event
 CUSTOM_KERNEL_KPD=kpd
@@ -162,7 +162,7 @@ CUSTOM_KERNEL_SUB_BACKUP_IMGSENSOR =
 CUSTOM_KERNEL_SUB_BACKUP_LENS= dummy_lens
 
 # Kernel space image sensor driver:Sub camera (front camera) used sensor driver.Value is used sub sensor name.
-CUSTOM_KERNEL_SUB_IMGSENSOR = s5k4e1ga_mipi_raw
+CUSTOM_KERNEL_SUB_IMGSENSOR = s5k4e1ga_raw
 
 # lens driver config for video telephony camera
 CUSTOM_KERNEL_SUB_LENS=dummy_lens

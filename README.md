@@ -1,1 +1,1 @@
-KK mt6589 THL W200
+kernel 3.4.67 KK mt6589 THL W200

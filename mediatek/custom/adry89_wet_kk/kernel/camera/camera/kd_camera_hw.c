@@ -227,12 +227,12 @@ u32 pinSetIdx = 0;//default main sensor
 if(currSensorName)
 {
 
-if(currSensorName && (0 == strcmp(SENSOR_DRVNAME_S5K4E1GA_MIPI_RAW,currSensorName)))  //zhaoshaopeng for sanglaishi and other 4e1 20120524
+if(currSensorName && (0 == strcmp(SENSOR_DRVNAME_S5K4E1GA_RAW,currSensorName)))  //zhaoshaopeng for sanglaishi and other 4e1 20120524
 {
     //power ON
     if (On) {
         //in case
-	printk("\r\n zhaoshaopeng add /SENSOR_DRVNAME_S5K4E1GA_MIPI_RAW  power on  \r\n");			
+	printk("\r\n zhaoshaopeng add /SENSOR_DRVNAME_S5K4E1GA_RAW  power on  \r\n");			
 #if 0 //TODO: depends on HW layout. Should be notified by SA.
         printk("Set CAMERA_POWER_PULL_PIN for power \n"); 
         if (mt_set_gpio_pull_enable(GPIO_CAMERA_LDO_EN_PIN, GPIO_PULL_DISABLE)) {PK_DBG("[[CAMERA SENSOR] Set CAMERA_POWER_PULL_PIN DISABLE ! \n"); }
@@ -326,7 +326,7 @@ if(currSensorName && (0 == strcmp(SENSOR_DRVNAME_S5K4E1GA_MIPI_RAW,currSensorNam
 	 mdelay(20); 
     }
     else {//power OFF
-        printk("\r\n zhaoshaopeng add SENSOR_DRVNAME_S5K4E1GA_MIPI_RAW power off \r\n");	
+        printk("\r\n zhaoshaopeng add SENSOR_DRVNAME_S5K4E1GA_RAW power off \r\n");	
 #if 0 //TODO: depends on HW layout. Should be notified by SA.
         printk("Set GPIO 94 for power OFF\n"); 
         if (mt_set_gpio_pull_enable(GPIO_CAMERA_LDO_EN_PIN, GPIO_PULL_DISABLE)) {PK_DBG("[CAMERA SENSOR] Set GPIO94 PULL DISABLE ! \n"); }
