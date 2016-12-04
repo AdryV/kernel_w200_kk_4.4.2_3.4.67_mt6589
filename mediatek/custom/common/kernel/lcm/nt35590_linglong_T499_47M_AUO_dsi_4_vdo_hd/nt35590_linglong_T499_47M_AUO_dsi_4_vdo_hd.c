@@ -83,6 +83,7 @@
 #include <linux/xlog.h>
 #include <mach/mt_pm_ldo.h>
 #endif
+
 // ---------------------------------------------------------------------------
 //  Local Constants
 // ---------------------------------------------------------------------------
@@ -100,7 +101,7 @@
 #endif
 
 #define REGFLAG_DELAY                                       0xFE
-#define REGFLAG_END_OF_TABLE                                0xFB 
+#define REGFLAG_END_OF_TABLE                                0x100 
 static unsigned int lcm_esd_test = FALSE;	///only for ESD test
 
 #define LCM_ID_NT35590 (0x90)
@@ -116,7 +117,6 @@ static LCM_UTIL_FUNCS lcm_util = {0};
 #define UDELAY(n) (lcm_util.udelay(n))
 #define MDELAY(n) (lcm_util.mdelay(n))
 
-
 // ---------------------------------------------------------------------------
 //  Local Functions
 // ---------------------------------------------------------------------------
@@ -126,11 +126,9 @@ static LCM_UTIL_FUNCS lcm_util = {0};
 #define wrtie_cmd(cmd)										lcm_util.dsi_write_cmd(cmd)
 #define write_regs(addr, pdata, byte_nums)					lcm_util.dsi_write_regs(addr, pdata, byte_nums)
 #define read_reg(cmd)											lcm_util.dsi_dcs_read_lcm_reg(cmd)
-#define read_reg_v2(cmd, buffer, buffer_size)   				lcm_util.dsi_dcs_read_lcm_reg_v2(cmd, buffer, buffer_size)   
-
+#define read_reg_v2(cmd, buffer, buffer_size)   				lcm_util.dsi_dcs_read_lcm_reg_v2(cmd, buffer, buffer_size)
 
 #define   LCM_DSI_CMD_MODE							1
-
 
 static struct LCM_setting_table
 {
@@ -138,7 +136,6 @@ static struct LCM_setting_table
     unsigned char count;
     unsigned char para_list[64];
 };
-
 
 static struct LCM_setting_table lcm_initialization_setting[] =
 {
@@ -603,33 +600,31 @@ static struct LCM_setting_table lcm_initialization_setting[] =
   {0xE7,1,{0x03}}, 
   {0xE8,1,{0xB8}}, 
   {0xE9,1,{0x03}}, 
-  {0xEA,1,{0xBE}}, 
-
-
-//////
-
+  {0xEA,1,{0xBE}},
+//
 	{0xFF,1,{0x00}},
-	{0x35,1,{0x00}},                                           
-
+	{0x35,1,{0x00}},
+//
 	{0x11,1,{0x00}},
+	
 	{REGFLAG_DELAY, 120, {}},                            
-                                                 
-                                                  
+
 	{0x29,1,{0x00}},            		
 	{REGFLAG_DELAY, 40, {}},
-
-	{0x00,0,{0x00}},
-		
-    {0x28, 0, {0x00}},
-    {REGFLAG_DELAY, 60, {}},
 	
-	{0x10, 0, {0x00}},
-	{REGFLAG_DELAY, 200, {}},
     {REGFLAG_END_OF_TABLE, 0x00, {}}
-			
 };
 
+static struct LCM_setting_table lcm_deep_sleep_mode_in_setting[] = {
+		
+    {0x28, 0, {0x00}},
+    {REGFLAG_DELAY, 10, {}},
 
+	{0x10, 0, {0x00}},
+	{REGFLAG_DELAY, 120, {}},
+	
+    {REGFLAG_END_OF_TABLE, 0x00, {}}
+};
 
 static void push_table(struct LCM_setting_table *table, unsigned int count, unsigned char force_update)
 {
@@ -643,21 +638,15 @@ static void push_table(struct LCM_setting_table *table, unsigned int count, unsi
 
         switch (cmd)
         {
-
             case REGFLAG_DELAY :
                 MDELAY(table[i].count);
                 break;
-
             case REGFLAG_END_OF_TABLE :
                 break;
-
-            default:
-				
+            default:				
 				dsi_set_cmdq_V2(cmd, table[i].count, table[i].para_list, force_update);
-
         }
     }
-
 }
 
 
@@ -666,117 +655,122 @@ static void lcm_set_util_funcs(const LCM_UTIL_FUNCS *util)
     memcpy(&lcm_util, util, sizeof(LCM_UTIL_FUNCS));
 }
 
-
 static void lcm_get_params(LCM_PARAMS *params)
 {
 
-		memset(params, 0, sizeof(LCM_PARAMS));
-	
-		params->type   = LCM_TYPE_DSI;
-
-		params->width  = FRAME_WIDTH;
-		params->height = FRAME_HEIGHT;
-                params->dbi.te_mode                             = LCM_DBI_TE_MODE_DISABLED;
-                params->dbi.te_edge_polarity            = LCM_POLARITY_RISING;
-
-        #if (LCM_DSI_CMD_MODE)
-		params->dsi.mode   = CMD_MODE;
-        #else
-		params->dsi.mode   = BURST_VDO_MODE; //SYNC_PULSE_VDO_MODE;//BURST_VDO_MODE;
-        #endif
-	
-		// DSI
-		/* Command mode setting */
-		//1 Three lane or Four lane
- 		params->dsi.LANE_NUM				= LCM_THREE_LANE;
- //  	params->dsi.LANE_NUM     = LCM_FOUR_LANE;
-		//The following defined the fomat for data coming from LCD engine.
-		params->dsi.data_format.format      = LCM_DSI_FORMAT_RGB888;
-
-		// Video mode setting
-		params->dsi.PS=LCM_PACKED_PS_24BIT_RGB888;
-
-		params->dsi.vertical_sync_active				= 2;// 3    2
-		params->dsi.vertical_backporch					= 20;// 20   1
-		params->dsi.vertical_frontporch					= 6; // 1  12
-		params->dsi.vertical_active_line				= FRAME_HEIGHT;
-
-		params->dsi.horizontal_sync_active				= 6;// 50  2
-		params->dsi.horizontal_backporch				= 12;
-		params->dsi.horizontal_frontporch				= 80;
-		params->dsi.horizontal_active_pixel				= FRAME_WIDTH;
-
-	    //params->dsi.LPX=8;
-
-		// Bit rate calculation
-		//1 Every lane speed
-		params->dsi.pll_div1=1;		// div1=0,1,2,3;div1_real=1,2,4,4 ----0: 546Mbps  1:273Mbps
-		params->dsi.pll_div2=1;		// div2=0,1,2,3;div1_real=1,2,4,4	
-		params->dsi.fbk_div =45;    // fref=26MHz, fvco=fref*(fbk_div+1)*2/(div1_real*div2_real)	
-
+  memset(params, 0, sizeof(LCM_PARAMS));
+//stock ThL.W200.156.140402.JBV2.HD.EN.COM.8P64_MT6589T	
+  params->width = 720;
+  params->height = 1280;
+  params->dsi.packet_size = 256;
+  params->dsi.vertical_active_line = 1280;
+  params->dsi.horizontal_active_pixel = 720;
+  params->type = 2;
+  params->dbi.te_mode = 0;
+  params->dsi.mode = 0;
+  params->dsi.LANE_NUM = 3;
+  params->dsi.data_format.color_order = 0;
+  params->dsi.data_format.trans_seq = 0;
+  params->dsi.data_format.padding = 0;
+  params->dsi.data_format.format = 2;
+  params->dsi.intermediat_buffer_num = 0;
+  params->dsi.PS = 2;
+  params->dsi.word_count = 2160;
+  params->dsi.vertical_sync_active = 3;
+  params->dsi.vertical_backporch = 8;
+  params->dsi.vertical_frontporch = 8;
+  params->dsi.horizontal_sync_active = 11;
+  params->dsi.horizontal_backporch = 64;
+  params->dsi.horizontal_frontporch = 64;
+  params->dsi.pll_div1 = 1;
+  params->dsi.pll_div2 = 1;
+  params->dsi.fbk_div = 47;
+  params->dsi.lcm_int_te_monitor = 0;
+  params->dsi.lcm_int_te_period = 1;
+  params->dsi.lcm_ext_te_monitor = 0;
+  params->dsi.noncont_clock = 0;
+  params->dsi.noncont_clock_period = 2;
+//
 }
 
 static void lcm_init(void)
 {
-	unsigned int data_array[16];
+  unsigned int data_array[16];
+  
 #ifdef BUILD_LK
 	upmu_set_rg_vgp6_vosel(6);
 	upmu_set_rg_vgp6_en(1);
-#else
-	hwPowerOn(MT65XX_POWER_LDO_VGP6, VOL_3000, "LCM");
 #endif
 
-	mt_set_gpio_mode(GPIO_LCD_RST_EN, GPIO_MODE_00);
-	mt_set_gpio_dir(GPIO_LCD_RST_EN, GPIO_DIR_OUT);
-	mt_set_gpio_out(GPIO_LCD_RST_EN, GPIO_OUT_ONE);
-	MDELAY(5);
-	mt_set_gpio_out(GPIO_LCD_RST_EN, GPIO_OUT_ZERO);
-	MDELAY(1);
-	mt_set_gpio_out(GPIO_LCD_RST_EN, GPIO_OUT_ONE);
-	MDELAY(20);
-	push_table(lcm_initialization_setting,
-		   sizeof(lcm_initialization_setting) /
-		   sizeof(struct LCM_setting_table), 1);
+  MDELAY(60);
+  SET_RESET_PIN(0);
+  MDELAY(20);
+  SET_RESET_PIN(1);
+  MDELAY(1);
+  
+  data_array[0] = 0xEEFF1500;
+  dsi_set_cmdq(data_array, 1, 1);
+  data_array[0] = 0x08261500;
+  dsi_set_cmdq(data_array, 1, 1);
+  MDELAY(1);
+  data_array[0] = 0x00261500;
+  dsi_set_cmdq(data_array, 1, 1);
+  data_array[0] = 0x00FF1500;
+  dsi_set_cmdq(data_array, 1, 1);
+  
+  MDELAY(10);
+  SET_RESET_PIN(0);
+  MDELAY(1);
+  SET_RESET_PIN(1);
+  MDELAY(20);
 
+  push_table(lcm_initialization_setting, sizeof(lcm_initialization_setting) / sizeof(struct LCM_setting_table), 1);
 }
 
 
 static void lcm_suspend(void)
 {
+  push_table(lcm_deep_sleep_mode_in_setting, sizeof(lcm_deep_sleep_mode_in_setting) / sizeof(struct LCM_setting_table), 1);
+  
+  SET_RESET_PIN(0);
+  MDELAY(10);
+  SET_RESET_PIN(1);
+  MDELAY(10);
 
-        unsigned int data_array[16];	
-
- 	data_array[0] = 0x00280500; // Sleep Out
-	dsi_set_cmdq(&data_array, 1, 1);
-
-        MDELAY(10);
-
-	data_array[0] = 0x00100500; // Display On
-	dsi_set_cmdq(&data_array, 1, 1); 
-        MDELAY(80);
-		
 #ifdef BUILD_LK
 	upmu_set_rg_vgp6_en(0);
-#else
-	hwPowerDown(MT65XX_POWER_LDO_VGP6, "LCM");
 #endif
 }
 
 
 static void lcm_resume(void)
 {
+  unsigned int data_array[16];
 
-        unsigned int data_array[16];	
-   	data_array[0] = 0x00110500; // Sleep Out
-	dsi_set_cmdq(&data_array, 1, 1);
+  SET_RESET_PIN(0);
+  MDELAY(20);
+  SET_RESET_PIN(1);
+  MDELAY(1);
+  
+  data_array[0] = 0xEEFF1500;
+  dsi_set_cmdq(data_array, 1, 1);
+  data_array[0] = 0x08261500;
+  dsi_set_cmdq(data_array, 1, 1);
+  
+  MDELAY(1);
+  
+  data_array[0] = 0x00261500;
+  dsi_set_cmdq(data_array, 1, 1);
+  data_array[0] = 0x00FF1500;
+  dsi_set_cmdq(data_array, 1, 1);
+  
+  MDELAY(10);
+  SET_RESET_PIN(0);
+  MDELAY(1);
+  SET_RESET_PIN(1);
+  MDELAY(20);
 
-	MDELAY(100);
-
-	data_array[0] = 0x00290500; // Display On
-	dsi_set_cmdq(&data_array, 1, 1); 
-    MDELAY(100);  
-		      
-
+  push_table(lcm_initialization_setting, sizeof(lcm_initialization_setting) / sizeof(struct LCM_setting_table), 1);
 }
          
 #if (LCM_DSI_CMD_MODE)
@@ -811,50 +805,43 @@ static void lcm_update(unsigned int x, unsigned int y,
 #endif
 	data_array[0]= 0x002c3909;
 	dsi_set_cmdq(&data_array, 1, 0);
-
 }
 #endif
 
 static unsigned int lcm_compare_id(void)
 {
-	unsigned int id = 0;
-	unsigned char buffer[2];
-	unsigned int array[16];
+  unsigned int id = 0;
+  unsigned char buffer[2];
+  unsigned int array[16];
+
 #ifdef BUILD_LK
 	upmu_set_rg_vgp6_vosel(6);
 	upmu_set_rg_vgp6_en(1);
-#else
-	hwPowerOn(MT65XX_POWER_LDO_VGP6, VOL_2800, "LCM");
 #endif
-/*
-	mt_set_gpio_mode(GPIO_LCD_RST_EN, GPIO_MODE_00);
-	mt_set_gpio_dir(GPIO_LCD_RST_EN, GPIO_DIR_OUT);
-*/
-	mt_set_gpio_out(GPIO_LCD_RST_EN, GPIO_OUT_ONE);
-	mt_set_gpio_out(GPIO_LCD_RST_EN, GPIO_OUT_ZERO);
-	MDELAY(1);
-	mt_set_gpio_out(GPIO_LCD_RST_EN, GPIO_OUT_ONE);
-	MDELAY(10);
 
-
-	array[0] = 0x00023700;	// read id return two byte,version and id
-	dsi_set_cmdq(array, 1, 1);
-
-	read_reg_v2(0xF4, buffer, 2);
-	id = buffer[0];		//we only need ID
+  mt_set_gpio_mode(131, 0);
+  mt_set_gpio_dir(131, 1);
+  mt_set_gpio_out(131, 1);
+  
+  MDELAY(60);
+  SET_RESET_PIN(1);
+  MDELAY(50);
+  SET_RESET_PIN(0);
+  MDELAY(50);
+  SET_RESET_PIN(1);
+  MDELAY(120);
+  
+  array[0] = 0x23700;
+  dsi_set_cmdq(array, 1, 1);  
+  read_reg_v2(0xF4, buffer, 2);
+  
 #ifdef BUILD_LK
-	printf("%s, LK nt35590 debug: nt35590 id = 0x%08x\n", __func__,
-	       id);
-#else
-	printk("%s, kernel nt35590 horse debug: nt35590 id = 0x%08x\n",
-	       __func__, id);
+	printf("%s, LK nt35590 debug: nt35590 id = 0x%08x\n", __func__, id);
+#else		   
+  printk("wqcat ykl id0_num = 0x%x,id1_num = 0x%x", buffer, __func__, id);
 #endif
-
-	if (id == LCM_ID_NT35590)
-		return 1;
-	else
-		return 0;
-
+  
+  return 1;
 }
 
 
