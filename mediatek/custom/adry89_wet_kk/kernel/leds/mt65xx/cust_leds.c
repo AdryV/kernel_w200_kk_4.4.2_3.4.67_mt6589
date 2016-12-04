@@ -32,90 +32,18 @@ unsigned int Cust_GetBacklightLevelSupport_byPWM(void)
 
 unsigned int brightness_mapping(unsigned int level)
 {
-    unsigned int mapped_level;
-    
-    mapped_level = level;
-       
-	return mapped_level;
+  unsigned int v_level = level;
+
+  if(level>255)
+		v_level = 255;
+
+  v_level = 50 - level/6;  
+
+    printk("MYCAT high light level:v_level:[%d,%d]\n",level,v_level);
+    return v_level;
 }
-/*
-unsigned int Cust_SetBacklight(int level, int div)
-{
-	kal_uint32 ret=0;
-//    mtkfb_set_backlight_pwm(div);
-//    mtkfb_set_backlight_level(brightness_mapping(level));
 
 
- * To explain How to set these para for cust_led_list[] of led/backlight
- * "name" para: led or backlight
- * "mode" para:which mode for led/backlight
- *	such as:
- *			MT65XX_LED_MODE_NONE,	
- *			MT65XX_LED_MODE_PWM,	
- *			MT65XX_LED_MODE_GPIO,	
- *			MT65XX_LED_MODE_PMIC,	
- *			MT65XX_LED_MODE_CUST_LCM,	
- *			MT65XX_LED_MODE_CUST_BLS_PWM
- *
- *"data" para: control methord for led/backlight
- *   such as:
- *			MT65XX_LED_PMIC_LCD_ISINK=0,	
- *			MT65XX_LED_PMIC_NLED_ISINK0,
- *			MT65XX_LED_PMIC_NLED_ISINK1,
- *			MT65XX_LED_PMIC_NLED_ISINK2,
- *			MT65XX_LED_PMIC_NLED_ISINK3
- * 
- *"PWM_config" para:PWM(AP side Or BLS module), by default setting{0,0,0,0,0} Or {0}
- *struct PWM_config {	 
- *  int clock_source;
- *  int div; 
- *  int low_duration;
- *  int High_duration;
- *  BOOL pmic_pad;//AP side PWM pin in PMIC chip (only 89 needs confirm); 1:yes 0:no(default)
- *};
- *-------------------------------------------------------------------------------------------
- *   for AP PWM setting as follow:
- *1.	 PWM config data
- *  clock_source: clock source frequency, can be 0/1
- *  div: clock division, can be any value within 0~7 (i.e. 1/2^(div) = /1, /2, /4, /8, /16, /32, /64, /128)
- *  low_duration: only for BACKLIGHT_LEVEL_PWM_64_FIFO_MODE_SUPPORT
- *  High_duration: only for BACKLIGHT_LEVEL_PWM_64_FIFO_MODE_SUPPORT
- *
- *2.	 PWM freq.
- * If BACKLIGHT_LEVEL_PWM_MODE_CONFIG = BACKLIGHT_LEVEL_PWM_256_SUPPORT,
- *	 PWM freq. = clock source / 2^(div) / 256  
- *
- * If BACKLIGHT_LEVEL_PWM_MODE_CONFIG = BACKLIGHT_LEVEL_PWM_64_FIFO_MODE_SUPPORT,
- *	 PWM freq. = clock source / 2^(div) / [(High_duration+1)(Level')+(low_duration+1)(64 - Level')]
- *	           = clock source / 2^(div) / [(High_duration+1)*64]     (when low_duration = High_duration)
- *Clock source: 
- *	 0: block clock/1625 = 26M/1625 = 16K (MT6571)
- *	 1: block clock = 26M (MT6571)
- *Div: 0~7
- *
- *For example, in MT6571, PWM_config = {1,1,0,0,0} 
- *	 ==> PWM freq. = 26M/2^1/256 	 =	50.78 KHz ( when BACKLIGHT_LEVEL_PWM_256_SUPPORT )
- *	 ==> PWM freq. = 26M/2^1/(0+1)*64 = 203.13 KHz ( when BACKLIGHT_LEVEL_PWM_64_FIFO_MODE_SUPPORT )
- *-------------------------------------------------------------------------------------------
- *   for BLS PWM setting as follow:
- *1.	 PWM config data
- *	 clock_source: clock source frequency, can be 0/1/2/3
- *	 div: clock division, can be any value within 0~1023
- *	 low_duration: non-use
- *	 High_duration: non-use
- *	 pmic_pad: non-use
- *
- *2.	 PWM freq.= clock source / (div + 1) /1024
- *Clock source: 
- *	 0: 26 MHz
- *	 1: 104 MHz
- *	 2: 124.8 MHz
- *	 3: 156 MHz
- *Div: 0~1023
- *
- *By default, clock_source = 0 and div = 0 => PWM freq. = 26 KHz 
- *-------------------------------------------------------------------------------------------
- */
  
 int Cust_SetRedlight(int level)
 {
@@ -127,6 +55,69 @@ int Cust_SetRedlight(int level)
 	
 	return 0;
 }
+
+static bool g_backlight_enabled;
+unsigned int Cust_SetBacklight(int level, int div)
+{
+	struct pwm_spec_config pwm_setting;
+
+	unsigned int l_level;
+
+	mt_set_gpio_mode(129, 0);
+	mt_set_gpio_dir(129, 1);
+
+  if(level) 
+  {
+
+	if ( !g_backlight_enabled )
+		g_backlight_enabled = true;
+
+	mt_set_gpio_mode(74, 1);
+
+	if (level >= 255)
+		level = 255;
+
+	mt_set_gpio_out(129, 1);
+
+        pwm_setting.pwm_no = PWM2; //PWM2=1;//=1;
+		pwm_setting.mode = PWM_MODE_FIFO; //=1;
+		pwm_setting.clk_div = div;
+        pwm_setting.clk_src = PWM_CLK_NEW_MODE_BLOCK; //=2;
+        pwm_setting.pmic_pad = FALSE; //=0; 
+
+		pwm_setting.PWM_MODE_FIFO_REGS.IDLE_VALUE = 0;
+        pwm_setting.PWM_MODE_FIFO_REGS.GUARD_VALUE = 0;
+        pwm_setting.PWM_MODE_FIFO_REGS.GDURATION = 0;
+        pwm_setting.PWM_MODE_FIFO_REGS.WAVE_NUM = 0;
+        pwm_setting.PWM_MODE_FIFO_REGS.STOP_BITPOS_VALUE = 63;
+        pwm_setting.PWM_MODE_FIFO_REGS.HDURATION = 4;
+        pwm_setting.PWM_MODE_FIFO_REGS.LDURATION = 4;
+
+	l_level = level / 6;
+
+	if (50 - l_level <= 32)
+	{
+		pwm_setting.PWM_MODE_FIFO_REGS.SEND_DATA1 = (1 << 50 - l_level) - 1;
+		pwm_setting.PWM_MODE_FIFO_REGS.SEND_DATA0 = 0;
+	}
+	else
+	{
+		pwm_setting.PWM_MODE_FIFO_REGS.SEND_DATA1 = 0xFFFFFFFF;
+		pwm_setting.PWM_MODE_FIFO_REGS.SEND_DATA0 = (1 << 18 - l_level) - 1;
+	}
+
+	printk("MYCAT level:l_level:div = %d,%d,%d\n", level,l_level, div);
+
+	pwm_set_spec_config(&pwm_setting);
+	}
+  else
+  {
+	g_backlight_enabled = false;
+	mt_set_gpio_out(129, 0);
+	mt_set_gpio_mode(74, 0);
+  }
+  return 0;
+}
  
 static struct cust_mt65xx_led cust_led_list[MT65XX_LED_TYPE_TOTAL] = {
 	{"red",               MT65XX_LED_MODE_GPIO, (int)Cust_SetRedlight,{0}},
@@ -135,7 +126,7 @@ static struct cust_mt65xx_led cust_led_list[MT65XX_LED_TYPE_TOTAL] = {
 	{"jogball-backlight", MT65XX_LED_MODE_NONE, -1,{0}},
 	{"keyboard-backlight",MT65XX_LED_MODE_NONE, -1,{0}},
 	{"button-backlight",  MT65XX_LED_MODE_PMIC, MT65XX_LED_PMIC_BUTTON,{0}},
-	{"lcd-backlight",     MT65XX_LED_MODE_CUST_LCM, (int)disp_bls_set_backlight,{0}},
+	{"lcd-backlight",     MT65XX_LED_MODE_CUST_LCM, (int)Cust_SetBacklight,{0}},
 };
 
 struct cust_mt65xx_led *get_cust_led_list(void)
